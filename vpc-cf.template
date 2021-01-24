@@ -1,4 +1,9 @@
 AWSTemplateFormatVersion: 2010-09-09
+Description: >
+  This template creates a VPC at AWS us-east-1 with CIDR block 172.16.0.0/16.
+  You are able to choose which availability zones public subnets will be created and
+  if private subnets should be created in AZs selected. Private subnets need a Nat Gateway to allow
+  traffic to go outside.
 Parameters:
   VPCName:
     Type: String
@@ -45,6 +50,13 @@ Parameters:
       - 'yes'
       - 'no'
     Description: Creates public and private subnets at availability zone us-east-1f. Private subnet will have a Nat Gateway.
+  PrivateSubnets:
+    Type: String
+    Default: 'no'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: Creates private subnets at availability zones select. A Nat Gateway will be created at public subnet in the same availability zone.
 Conditions:
   CreateAZA: !Equals [ !Ref AvailabilityZoneA, 'yes' ]
   CreateAZB: !Equals [ !Ref AvailabilityZoneB, 'yes' ]
@@ -52,6 +64,12 @@ Conditions:
   CreateAZD: !Equals [ !Ref AvailabilityZoneD, 'yes' ]
   CreateAZE: !Equals [ !Ref AvailabilityZoneE, 'yes' ]
   CreateAZF: !Equals [ !Ref AvailabilityZoneF, 'yes' ]
+  CreatePrivateSubnet1: !And [ !Condition CreateAZA, !Equals [ !Ref PrivateSubnets, 'yes' ]]
+  CreatePrivateSubnet2: !And [ !Condition CreateAZB, !Equals [ !Ref PrivateSubnets, 'yes' ]]
+  CreatePrivateSubnet3: !And [ !Condition CreateAZC, !Equals [ !Ref PrivateSubnets, 'yes' ]]
+  CreatePrivateSubnet4: !And [ !Condition CreateAZD, !Equals [ !Ref PrivateSubnets, 'yes' ]]
+  CreatePrivateSubnet5: !And [ !Condition CreateAZE, !Equals [ !Ref PrivateSubnets, 'yes' ]]
+  CreatePrivateSubnet6: !And [ !Condition CreateAZF, !Equals [ !Ref PrivateSubnets, 'yes' ]]
 Resources:
   VPC:
     Type: 'AWS::EC2::VPC'
@@ -175,7 +193,7 @@ Resources:
                   - !Ref VPCName
   EIP1:
     Type: 'AWS::EC2::EIP'
-    Condition: CreateAZA
+    Condition: CreatePrivateSubnet1
     Properties:
       Domain: vpc
       Tags:
@@ -188,7 +206,7 @@ Resources:
                   - !Ref VPCName
   EIP2:
     Type: 'AWS::EC2::EIP'
-    Condition: CreateAZB
+    Condition: CreatePrivateSubnet2
     Properties:
       Domain: vpc
       Tags:
@@ -201,7 +219,7 @@ Resources:
                   - !Ref VPCName
   EIP3:
     Type: 'AWS::EC2::EIP'
-    Condition: CreateAZC
+    Condition: CreatePrivateSubnet3
     Properties:
       Domain: vpc
       Tags:
@@ -214,7 +232,7 @@ Resources:
                   - !Ref VPCName
   EIP4:
     Type: 'AWS::EC2::EIP'
-    Condition: CreateAZD
+    Condition: CreatePrivateSubnet4
     Properties:
       Domain: vpc
       Tags:
@@ -227,7 +245,7 @@ Resources:
                   - !Ref VPCName
   EIP5:
     Type: 'AWS::EC2::EIP'
-    Condition: CreateAZE
+    Condition: CreatePrivateSubnet5
     Properties:
       Domain: vpc
       Tags:
@@ -240,7 +258,7 @@ Resources:
                   - !Ref VPCName
   EIP6:
     Type: 'AWS::EC2::EIP'
-    Condition: CreateAZF
+    Condition: CreatePrivateSubnet6
     Properties:
       Domain: vpc
       Tags:
@@ -253,7 +271,7 @@ Resources:
                   - !Ref VPCName
   NatGateway1:
     Type: 'AWS::EC2::NatGateway'
-    Condition: CreateAZA
+    Condition: CreatePrivateSubnet1
     Properties:
       SubnetId: !Ref PublicSubnet1
       AllocationId: !GetAtt 
@@ -269,7 +287,7 @@ Resources:
                   - !Ref VPCName
   NatGateway2:
     Type: 'AWS::EC2::NatGateway'
-    Condition: CreateAZB
+    Condition: CreatePrivateSubnet2
     Properties:
       SubnetId: !Ref PublicSubnet2
       AllocationId: !GetAtt 
@@ -285,7 +303,7 @@ Resources:
                   - !Ref VPCName
   NatGateway3:
     Type: 'AWS::EC2::NatGateway'
-    Condition: CreateAZC
+    Condition: CreatePrivateSubnet3
     Properties:
       SubnetId: !Ref PublicSubnet3
       AllocationId: !GetAtt 
@@ -301,7 +319,7 @@ Resources:
                   - !Ref VPCName
   NatGateway4:
     Type: 'AWS::EC2::NatGateway'
-    Condition: CreateAZD
+    Condition: CreatePrivateSubnet4
     Properties:
       SubnetId: !Ref PublicSubnet4
       AllocationId: !GetAtt 
@@ -317,7 +335,7 @@ Resources:
                   - !Ref VPCName
   NatGateway5:
     Type: 'AWS::EC2::NatGateway'
-    Condition: CreateAZE
+    Condition: CreatePrivateSubnet5
     Properties:
       SubnetId: !Ref PublicSubnet5
       AllocationId: !GetAtt 
@@ -333,7 +351,7 @@ Resources:
                   - !Ref VPCName
   NatGateway6:
     Type: 'AWS::EC2::NatGateway'
-    Condition: CreateAZF
+    Condition: CreatePrivateSubnet6
     Properties:
       SubnetId: !Ref PublicSubnet6
       AllocationId: !GetAtt 
@@ -349,7 +367,7 @@ Resources:
                   - !Ref VPCName
   PrivateSubnet1:
     Type: 'AWS::EC2::Subnet'
-    Condition: CreateAZA
+    Condition: CreatePrivateSubnet1
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: us-east-1a
@@ -364,7 +382,7 @@ Resources:
                   - !Ref VPCName
   PrivateSubnet2:
     Type: 'AWS::EC2::Subnet'
-    Condition: CreateAZB
+    Condition: CreatePrivateSubnet2
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: us-east-1b
@@ -379,7 +397,7 @@ Resources:
                   - !Ref VPCName
   PrivateSubnet3:
     Type: 'AWS::EC2::Subnet'
-    Condition: CreateAZC
+    Condition: CreatePrivateSubnet3
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: us-east-1c
@@ -394,7 +412,7 @@ Resources:
                   - !Ref VPCName
   PrivateSubnet4:
     Type: 'AWS::EC2::Subnet'
-    Condition: CreateAZD
+    Condition: CreatePrivateSubnet4
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: us-east-1d
@@ -409,7 +427,7 @@ Resources:
                   - !Ref VPCName
   PrivateSubnet5:
     Type: 'AWS::EC2::Subnet'
-    Condition: CreateAZE
+    Condition: CreatePrivateSubnet5
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: us-east-1e
@@ -424,7 +442,7 @@ Resources:
                   - !Ref VPCName
   PrivateSubnet6:
     Type: 'AWS::EC2::Subnet'
-    Condition: CreateAZF
+    Condition: CreatePrivateSubnet6
     Properties:
       VpcId: !Ref VPC
       AvailabilityZone: us-east-1f
@@ -451,7 +469,7 @@ Resources:
                   - !Ref VPCName
   PrivateRouteTable1:
     Type: 'AWS::EC2::RouteTable'
-    Condition: CreateAZA
+    Condition: CreatePrivateSubnet1
     Properties:
       VpcId: !Ref VPC
       Tags:
@@ -464,7 +482,7 @@ Resources:
                   - !Ref VPCName
   PrivateRouteTable2:
     Type: 'AWS::EC2::RouteTable'
-    Condition: CreateAZB
+    Condition: CreatePrivateSubnet2
     Properties:
       VpcId: !Ref VPC
       Tags:
@@ -477,7 +495,7 @@ Resources:
                   - !Ref VPCName
   PrivateRouteTable3:
     Type: 'AWS::EC2::RouteTable'
-    Condition: CreateAZC
+    Condition: CreatePrivateSubnet3
     Properties:
       VpcId: !Ref VPC
       Tags:
@@ -490,7 +508,7 @@ Resources:
                   - !Ref VPCName
   PrivateRouteTable4:
     Type: 'AWS::EC2::RouteTable'
-    Condition: CreateAZD
+    Condition: CreatePrivateSubnet4
     Properties:
       VpcId: !Ref VPC
       Tags:
@@ -503,7 +521,7 @@ Resources:
                   - !Ref VPCName
   PrivateRouteTable5:
     Type: 'AWS::EC2::RouteTable'
-    Condition: CreateAZE
+    Condition: CreatePrivateSubnet5
     Properties:
       VpcId: !Ref VPC
       Tags:
@@ -516,7 +534,7 @@ Resources:
                   - !Ref VPCName
   PrivateRouteTable6:
     Type: 'AWS::EC2::RouteTable'
-    Condition: CreateAZF
+    Condition: CreatePrivateSubnet6
     Properties:
       VpcId: !Ref VPC
       Tags:
@@ -535,115 +553,115 @@ Resources:
       GatewayId: !Ref InternetGateway 
   PrivateRoute1:
     Type: 'AWS::EC2::Route'
-    Condition: CreateAZA
+    Condition: CreatePrivateSubnet1
     Properties:
       RouteTableId: !Ref PrivateRouteTable1
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway1
   PrivateRoute2:
     Type: 'AWS::EC2::Route'
-    Condition: CreateAZB
+    Condition: CreatePrivateSubnet2
     Properties:
       RouteTableId: !Ref PrivateRouteTable2
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway2
   PrivateRoute3:
     Type: 'AWS::EC2::Route'
-    Condition: CreateAZC
+    Condition: CreatePrivateSubnet3
     Properties:
       RouteTableId: !Ref PrivateRouteTable3
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway3
   PrivateRoute4:
     Type: 'AWS::EC2::Route'
-    Condition: CreateAZD
+    Condition: CreatePrivateSubnet4
     Properties:
       RouteTableId: !Ref PrivateRouteTable4
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway4
   PrivateRoute5:
     Type: 'AWS::EC2::Route'
-    Condition: CreateAZE
+    Condition: CreatePrivateSubnet5
     Properties:
       RouteTableId: !Ref PrivateRouteTable5
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway5
   PrivateRoute6:
     Type: 'AWS::EC2::Route'
-    Condition: CreateAZF
+    Condition: CreatePrivateSubnet6
     Properties:
       RouteTableId: !Ref PrivateRouteTable6
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway6
-  EC2SRTA1K11H:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Condition: CreateAZA
-    Properties:
-      SubnetId: !Ref PrivateSubnet1
-      RouteTableId: !Ref PrivateRouteTable1
-  EC2SRTA4ARC6:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Condition: CreateAZB
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable2
-      SubnetId: !Ref PrivateSubnet2
-  EC2SRTA4TP3:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Condition: CreateAZC
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable3
-      SubnetId: !Ref PrivateSubnet3
-  EC2SRTA20YCK:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Condition: CreateAZD
-    Properties:
-      SubnetId: !Ref PrivateSubnet4
-      RouteTableId: !Ref PrivateRouteTable4
-  EC2SRTA27VDL:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Condition: CreateAZE
-    Properties:
-      SubnetId: !Ref PrivateSubnet5
-      RouteTableId: !Ref PrivateRouteTable5
-  EC2SRTA1NPPT:
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
-    Condition: CreateAZF
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable6
-      SubnetId: !Ref PrivateSubnet6
-  EC2SRTA54UAH:
+  PublicSubnetRouteTableAssociation1:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Condition: CreateAZA
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet1
-  EC2SRTA4UXX3:
+  PublicSubnetRouteTableAssociation2:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Condition: CreateAZB
     Properties:
       SubnetId: !Ref PublicSubnet2
       RouteTableId: !Ref PublicRouteTable
-  EC2SRTA45C7G:
+  PublicSubnetRouteTableAssociation3:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Condition: CreateAZC
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet3
-  EC2SRTA3MGHK:
+  PublicSubnetRouteTableAssociation4:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Condition: CreateAZD
     Properties:
       SubnetId: !Ref PublicSubnet4
       RouteTableId: !Ref PublicRouteTable
-  EC2SRTA1F3GQ:
+  PublicSubnetRouteTableAssociation5:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Condition: CreateAZE
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet5
-  EC2SRTA2NEKD:
+  PublicSubnetRouteTableAssociation6:
     Type: 'AWS::EC2::SubnetRouteTableAssociation'
     Condition: CreateAZF
     Properties:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicSubnet6
+  PrivateSubnetRouteTableAssociation1:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreatePrivateSubnet1
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+  PrivateSubnetRouteTableAssociation2:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreatePrivateSubnet2
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
+  PrivateSubnetRouteTableAssociation3:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreatePrivateSubnet3
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet3
+  PrivateSubnetRouteTableAssociation4:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreatePrivateSubnet4
+    Properties:
+      SubnetId: !Ref PrivateSubnet4
+      RouteTableId: !Ref PrivateRouteTable4
+  PrivateSubnetRouteTableAssociation5:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreatePrivateSubnet5
+    Properties:
+      SubnetId: !Ref PrivateSubnet5
+      RouteTableId: !Ref PrivateRouteTable5
+  PrivateSubnetRouteTableAssociation6:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreatePrivateSubnet6
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable6
+      SubnetId: !Ref PrivateSubnet6
