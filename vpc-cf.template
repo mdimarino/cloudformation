@@ -1,0 +1,649 @@
+AWSTemplateFormatVersion: 2010-09-09
+Parameters:
+  VPCName:
+    Type: String
+    Description: VPC's name, will have 'vpc-' as a prefix.
+  AvailabilityZoneA:
+    Type: String
+    Default: 'yes'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: Creates public and private subnets at availability zone us-east-1a. Private subnet will have a Nat Gateway.
+  AvailabilityZoneB:
+    Type: String
+    Default: 'no'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: Creates public and private subnets at availability zone us-east-1b. Private subnet will have a Nat Gateway.
+  AvailabilityZoneC:
+    Type: String
+    Default: 'no'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: Creates public and private subnets at availability zone us-east-1c. Private subnet will have a Nat Gateway.
+  AvailabilityZoneD:
+    Type: String
+    Default: 'no'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: Creates public and private subnets at availability zone us-east-1d. Private subnet will have a Nat Gateway.
+  AvailabilityZoneE:
+    Type: String
+    Default: 'no'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: Creates public and private subnets at availability zone us-east-1e. Private subnet will have a Nat Gateway.
+  AvailabilityZoneF:
+    Type: String
+    Default: 'no'
+    AllowedValues:
+      - 'yes'
+      - 'no'
+    Description: Creates public and private subnets at availability zone us-east-1f. Private subnet will have a Nat Gateway.
+Conditions:
+  CreateAZA: !Equals [ !Ref AvailabilityZoneA, 'yes' ]
+  CreateAZB: !Equals [ !Ref AvailabilityZoneB, 'yes' ]
+  CreateAZC: !Equals [ !Ref AvailabilityZoneC, 'yes' ]
+  CreateAZD: !Equals [ !Ref AvailabilityZoneD, 'yes' ]
+  CreateAZE: !Equals [ !Ref AvailabilityZoneE, 'yes' ]
+  CreateAZF: !Equals [ !Ref AvailabilityZoneF, 'yes' ]
+Resources:
+  VPC:
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 172.16.0.0/16
+      EnableDnsHostnames: 'true'
+      EnableDnsSupport: 'true'
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'vpc'
+                  - !Ref VPCName
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties:
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'igw'
+                  - !Ref VPCName
+  VPCGatewayAttachment:
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZA
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 172.16.0.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PublicSubnet1'
+                  - !Ref VPCName
+  PublicSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZB
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1b
+      CidrBlock: 172.16.2.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PublicSubnet2'
+                  - !Ref VPCName
+  PublicSubnet3:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZC
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1c
+      CidrBlock: 172.16.4.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PublicSubnet3'
+                  - !Ref VPCName
+  PublicSubnet4:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZD
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1d
+      CidrBlock: 172.16.6.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PublicSubnet4'
+                  - !Ref VPCName
+  PublicSubnet5:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZE
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1e
+      CidrBlock: 172.16.8.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PublicSubnet5'
+                  - !Ref VPCName
+  PublicSubnet6:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZF
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1f
+      CidrBlock: 172.16.10.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PublicSubnet6'
+                  - !Ref VPCName
+  EIP1:
+    Type: 'AWS::EC2::EIP'
+    Condition: CreateAZA
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'EIP1'
+                  - !Ref VPCName
+  EIP2:
+    Type: 'AWS::EC2::EIP'
+    Condition: CreateAZB
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'EIP2'
+                  - !Ref VPCName
+  EIP3:
+    Type: 'AWS::EC2::EIP'
+    Condition: CreateAZC
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'EIP3'
+                  - !Ref VPCName
+  EIP4:
+    Type: 'AWS::EC2::EIP'
+    Condition: CreateAZD
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'EIP4'
+                  - !Ref VPCName
+  EIP5:
+    Type: 'AWS::EC2::EIP'
+    Condition: CreateAZE
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'EIP5'
+                  - !Ref VPCName
+  EIP6:
+    Type: 'AWS::EC2::EIP'
+    Condition: CreateAZF
+    Properties:
+      Domain: vpc
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'EIP6'
+                  - !Ref VPCName
+  NatGateway1:
+    Type: 'AWS::EC2::NatGateway'
+    Condition: CreateAZA
+    Properties:
+      SubnetId: !Ref PublicSubnet1
+      AllocationId: !GetAtt 
+        - EIP1
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'NatGateway1'
+                  - !Ref VPCName
+  NatGateway2:
+    Type: 'AWS::EC2::NatGateway'
+    Condition: CreateAZB
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      AllocationId: !GetAtt 
+        - EIP2
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'NatGateway2'
+                  - !Ref VPCName
+  NatGateway3:
+    Type: 'AWS::EC2::NatGateway'
+    Condition: CreateAZC
+    Properties:
+      SubnetId: !Ref PublicSubnet3
+      AllocationId: !GetAtt 
+        - EIP3
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'NatGateway3'
+                  - !Ref VPCName
+  NatGateway4:
+    Type: 'AWS::EC2::NatGateway'
+    Condition: CreateAZD
+    Properties:
+      SubnetId: !Ref PublicSubnet4
+      AllocationId: !GetAtt 
+        - EIP4
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'NatGateway4'
+                  - !Ref VPCName
+  NatGateway5:
+    Type: 'AWS::EC2::NatGateway'
+    Condition: CreateAZE
+    Properties:
+      SubnetId: !Ref PublicSubnet5
+      AllocationId: !GetAtt 
+        - EIP5
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'NatGateway5'
+                  - !Ref VPCName
+  NatGateway6:
+    Type: 'AWS::EC2::NatGateway'
+    Condition: CreateAZF
+    Properties:
+      SubnetId: !Ref PublicSubnet6
+      AllocationId: !GetAtt 
+        - EIP6
+        - AllocationId
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'NatGateway6'
+                  - !Ref VPCName
+  PrivateSubnet1:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZA
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1a
+      CidrBlock: 172.16.1.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateSubnet1'
+                  - !Ref VPCName
+  PrivateSubnet2:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZB
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1b
+      CidrBlock: 172.16.3.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateSubnet2'
+                  - !Ref VPCName
+  PrivateSubnet3:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZC
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1c
+      CidrBlock: 172.16.5.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateSubnet3'
+                  - !Ref VPCName
+  PrivateSubnet4:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZD
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1d
+      CidrBlock: 172.16.7.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateSubnet4'
+                  - !Ref VPCName
+  PrivateSubnet5:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZE
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1e
+      CidrBlock: 172.16.9.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateSubnet5'
+                  - !Ref VPCName
+  PrivateSubnet6:
+    Type: 'AWS::EC2::Subnet'
+    Condition: CreateAZF
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: us-east-1f
+      CidrBlock: 172.16.11.0/24
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateSubnet6'
+                  - !Ref VPCName
+  PublicRouteTable:
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PublicRouteTable'
+                  - !Ref VPCName
+  PrivateRouteTable1:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: CreateAZA
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateRouteTable1'
+                  - !Ref VPCName
+  PrivateRouteTable2:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: CreateAZB
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateRouteTable2'
+                  - !Ref VPCName
+  PrivateRouteTable3:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: CreateAZC
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateRouteTable3'
+                  - !Ref VPCName
+  PrivateRouteTable4:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: CreateAZD
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateRouteTable4'
+                  - !Ref VPCName
+  PrivateRouteTable5:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: CreateAZE
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateRouteTable5'
+                  - !Ref VPCName
+  PrivateRouteTable6:
+    Type: 'AWS::EC2::RouteTable'
+    Condition: CreateAZF
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value:
+            !Join
+                - '-'
+                -
+                  - 'PrivateRouteTable6'
+                  - !Ref VPCName
+  PublicRoute:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway 
+  PrivateRoute1:
+    Type: 'AWS::EC2::Route'
+    Condition: CreateAZA
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable1
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway1
+  PrivateRoute2:
+    Type: 'AWS::EC2::Route'
+    Condition: CreateAZB
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
+  PrivateRoute3:
+    Type: 'AWS::EC2::Route'
+    Condition: CreateAZC
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway3
+  PrivateRoute4:
+    Type: 'AWS::EC2::Route'
+    Condition: CreateAZD
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable4
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway4
+  PrivateRoute5:
+    Type: 'AWS::EC2::Route'
+    Condition: CreateAZE
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable5
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway5
+  PrivateRoute6:
+    Type: 'AWS::EC2::Route'
+    Condition: CreateAZF
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable6
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway6
+  EC2SRTA1K11H:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZA
+    Properties:
+      SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+  EC2SRTA4ARC6:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZB
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable2
+      SubnetId: !Ref PrivateSubnet2
+  EC2SRTA4TP3:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZC
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable3
+      SubnetId: !Ref PrivateSubnet3
+  EC2SRTA20YCK:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZD
+    Properties:
+      SubnetId: !Ref PrivateSubnet4
+      RouteTableId: !Ref PrivateRouteTable4
+  EC2SRTA27VDL:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZE
+    Properties:
+      SubnetId: !Ref PrivateSubnet5
+      RouteTableId: !Ref PrivateRouteTable5
+  EC2SRTA1NPPT:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZF
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable6
+      SubnetId: !Ref PrivateSubnet6
+  EC2SRTA54UAH:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZA
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet1
+  EC2SRTA4UXX3:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZB
+    Properties:
+      SubnetId: !Ref PublicSubnet2
+      RouteTableId: !Ref PublicRouteTable
+  EC2SRTA45C7G:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZC
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet3
+  EC2SRTA3MGHK:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZD
+    Properties:
+      SubnetId: !Ref PublicSubnet4
+      RouteTableId: !Ref PublicRouteTable
+  EC2SRTA1F3GQ:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZE
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet5
+  EC2SRTA2NEKD:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Condition: CreateAZF
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet6
